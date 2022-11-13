@@ -1,6 +1,13 @@
 // 这里的请求,需要自己维护
 
 import axios from 'axios'
+import store from '@/store'
+import { Message } from 'element-ui'
+// 提示消息组件
+import router from '@/router'
+import { getTimeStamp } from './auth' // 获取时间戳
+const Timeout = 3600 // 定义超时时间(秒)
+
 const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_API,
   timeout: 5000
@@ -8,14 +15,58 @@ const service = axios.create({
 
 // 添加请求拦截器
 service.interceptors.request.use(config => {
-  return config
+  // config 是请求的配置信息
+  // 注入 token
+  if (store.getters.token) {
+    // 只有在有token的情况下 才有必要去检查时间戳是否超时
+    if (IsCheckTimeOut()) {
+      // 如果他为 true 说明超时了
+      // 所以 token 没用了
+      store.dispatch('user/logout') // 登出操作
+      // 跳转到登录页
+      router.push('/login')
+      return Promise.reject(new Error('token超时了'))
+    }
+    config.headers['Authorization'] = `Bearer ${store.getters.token}`
+  }
+  return config // 必须要返回的
+}, error => {
+  return Promise.reject(error)
 })
 
 // 添加响应拦截器
-service.interceptors.request.use(res => {
-  const { data } = res
-  return data
+service.interceptors.response.use(res => {
+  const { data, success, message } = res.data
+  // data 是真实服务器返回的数据
+  // success 是用来判断当前请求在 200 的情况下,也有可能是有误的数据
+  if (success) {
+    return data
+  } else {
+    // 说明当前请求是通的,但是数据有误(依然认为当前请求是失败的)
+    // 可以来一个提示消息
+    Message.error(message)
+    // 还需要返回一个失败状态下的 promise
+    return Promise.reject(new Error(message))
+  }
+}, error => {
+  // Token失效的被动处理
+  // error 信息里面 response 对象
+  if (error.response && error.response.data && error.response.data.code === 10002) {
+    // 当等于 10002 的时候 表示 后端告诉我 token 超时了
+    store.dispatch('user/logout') // 登出action   删除token
+    router.push('/login')
+  } else {
+    Message.error(error.message) // 提示错误信息
+  }
+  return Promise.reject(error) // 需要返回一个失败状态下的 promise
 })
+// 是否超时
+// 超时逻辑 (当前时间戳 - 缓存中的时间戳) 是否大于 设置的超时时间
+function IsCheckTimeOut() {
+  const currentTime = Date.now() // 当前时间戳
+  const timeStamp = getTimeStamp() // 缓存时间戳
+  return (currentTime - timeStamp) / 1000 > Timeout
+}
 
 export default service
 

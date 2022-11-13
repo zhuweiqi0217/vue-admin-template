@@ -29,12 +29,26 @@ module.exports = {
   assetsDir: 'static',
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,
-  devServer: {
-    port: port,
-    open: true,
+  devServer: { // 开发期间可以设置相关配置
+    port: port, // 设置端口
+    open: true, // 自动打开浏览器
     overlay: {
       warnings: false,
       errors: true
+    },
+    // 配置反向代理
+    proxy: { // 这个地址可以随意配置(数量不限)
+      // 当地址中有/api的时候会触发代理机制 你要访问到的地址
+      '/api': {
+        target: 'http://ihrm-java.itheima.net/', // 要代理的服务器地址  这里不需要写api,会自动带上    target -> 目标的意思
+        changeOrigin: true // 是否跨域 需要设置此值为true 才可以让本地服务代理我们发出请求
+      // 路径重写(可写可不写,看需求)
+      // 如果有需要在真正请求期间将 /api 去除的话,可以通过 pathRewrite 去去除
+      //    pathRewrite: {
+      //     // 重新路由  localhost:8888/api/login  => www.baidu.com/api/login
+      //     '^/api': '' // 假设我们想把 localhost:8888/api/login 变成www.baidu.com/login 就需要这么做,将/api置空
+      // }
+      }
     }
     // before: require('./mock/mock-server.js')
   },
