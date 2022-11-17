@@ -36,6 +36,7 @@
 import { mapGetters } from 'vuex'
 // import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
+// import defaultImg from '@/assets/common/head.jpg'
 
 export default {
   components: {
@@ -45,6 +46,8 @@ export default {
   data() {
     return {
       defaultImg: require('@/assets/common/head.jpg')
+      // 也可以在 import 引入注册使用
+      // defaultImg
     }
   },
   computed: {
@@ -149,7 +152,7 @@ export default {
       margin-right: 30px;
 
       .avatar-wrapper {
-        margin-top: 5px;
+        // margin-top: 5px;
         position: relative;
 
         .user-avatar {

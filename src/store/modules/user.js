@@ -1,6 +1,6 @@
 // user 子模块,需要我们自己去维护
 import { getToken, setToken, removeToken, setTimeStamp } from '@/utils/auth'
-import { login, getInfo, getUserDetailById } from '@/api/user'
+import { login, getUserInfo, getUserDetailById } from '@/api/user'
 
 const state = {
   token: getToken(), // token 的初始值,应该先从缓存中读取
@@ -21,11 +21,11 @@ const mutations = {
     // }
     token ? setToken(token) : removeToken()
   },
-  setUserInfo(state, result) {
+  setUserInfo(state, userInfo) {
     // 更新一个对象
-    state.userInfo = result // 这样是响应式
-    // state.userInfo = { ...result }  // 这样也是响应式 属于浅拷贝
-    // state.userInfo['username'] = result  // 这样才不是响应式
+    // state.userInfo = userInfo // 这样是响应式
+    state.userInfo = { ...userInfo } // 这样也是响应式 属于浅拷贝
+    // state.userInfo['username'] = userInfo  // 这样才不是响应式
   },
   // 删除用户信息
   reomveUserInfo(state) {
@@ -48,21 +48,23 @@ const actions = {
       return false
     }
   },
-  async getInfo({ commit }) {
-    const result = await getInfo()
+  async getUserInfo({ commit }) {
+    const data = await getUserInfo()
     // 获取用户的详情  用户的详细数据(为了获取头像)
-    const baseInfo = await getUserDetailById(result.userId)
-    const baseResult = { ...result, ...baseInfo } // 将两个接口结果合并
+    const baseInfo = await getUserDetailById(data.userId)
+    const baseResult = { ...data, ...baseInfo } // 将两个接口结果合并
     // 将整个的个人信息数据设置到用户的vuex数据中
-    commit('setUserInfo', baseResult) // 提交到 mutations
-    return result // 为后面做权限的时候埋下伏笔
+    // 是上述两个请求回来的结果做了合并,统一给全局状态 userInfo 做赋值
+    commit('setUserInfo', baseResult) // 提交到 mutations(修改数据必须要到mutations里面操作)
+    return data // 为后面做权限的时候埋下伏笔
   },
-  // 登出操作
+  // 登出操作: 1.清空 token   2.清空 userInfo
   logout({ commit }) {
     // 删除  token
     commit('setToken')
     // 删除用户资料
     commit('reomveUserInfo')
+    // 也可以这样写  commit('setUserInfo')
   }
 }
 
@@ -73,7 +75,7 @@ export default {
   actions
 }
 
-// import { login, logout, getInfo } from '@/api/user'
+// import { login, logout, getUserInfo } from '@/api/user'
 // import { getToken, setToken, removeToken } from '@/utils/auth'
 // import { resetRouter } from '@/router'
 
@@ -119,9 +121,9 @@ export default {
 //   },
 
 //   // get user info
-//   getInfo({ commit, state }) {
+//   getUserInfo({ commit, state }) {
 //     return new Promise((resolve, reject) => {
-//       getInfo(state.token).then(response => {
+//       getUserInfo(state.token).then(response => {
 //         const { data } = response
 
 //         if (!data) {

@@ -1,5 +1,6 @@
 // 负责管理所有的自定义指令
 
+// 定义图片指令(处理图片没有正常加载的情况)
 export const imagerror = {
   // 指令对象 会在当前的dom元素插入到节点之后执行
   inserted(dom, options) {

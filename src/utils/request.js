@@ -14,20 +14,23 @@ const service = axios.create({
 })
 
 // 添加请求拦截器
-service.interceptors.request.use(config => {
+service.interceptors.request.use(async config => {
   // config 是请求的配置信息
   // 注入 token
-  if (store.getters.token) {
+  const token = store.getters.token
+  if (token) {
     // 只有在有token的情况下 才有必要去检查时间戳是否超时
     if (IsCheckTimeOut()) {
       // 如果他为 true 说明超时了
-      // 所以 token 没用了
-      store.dispatch('user/logout') // 登出操作
+      // 所以 token 没用了 -> 需要清空 token、清空 userInfo、跳转到登录页
+      await store.dispatch('user/logout') // 登出操作
+      // this.$store.dispatch('user/logout')
+      // 注意: js文件中的this为undefined,所以这边不能用this来指向
       // 跳转到登录页
       router.push('/login')
       return Promise.reject(new Error('token超时了'))
     }
-    config.headers['Authorization'] = `Bearer ${store.getters.token}`
+    config.headers['Authorization'] = `Bearer ${token}`
   }
   return config // 必须要返回的
 }, error => {
@@ -50,8 +53,8 @@ service.interceptors.response.use(res => {
   }
 }, error => {
   // Token失效的被动处理
-  // error 信息里面 response 对象
-  if (error.response && error.response.data && error.response.data.code === 10002) {
+  // error 信息里面 response 对象   可选链操作符 ?.
+  if (error?.response?.data?.code === 10002) {
     // 当等于 10002 的时候 表示 后端告诉我 token 超时了
     store.dispatch('user/logout') // 登出action   删除token
     router.push('/login')

@@ -5,7 +5,7 @@ import 'normalize.css/normalize.css' // A modern alternative to CSS resets
 
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
-import locale from 'element-ui/lib/locale/lang/en' // lang i18n
+// import locale from 'element-ui/lib/locale/lang/en' // lang i18n
 
 import '@/styles/index.scss' // global css
 
@@ -33,14 +33,15 @@ import '@/permission' // permission control
 // }
 
 // set ElementUI lang to EN
-Vue.use(ElementUI, { locale })
+// Vue.use(ElementUI, { locale })
 // 如果想要中文版 element-ui，按如下方式声明
-// Vue.use(ElementUI)
+Vue.use(ElementUI)
 // console.log(directives)
 // es6 新增的方法将对象的键或者值转为数组
 // console.log(Object.keys(directives))     // ['imagerror']
-Object.keys(directives).forEach(key => {
-  Vue.directive(key, directives[key]) // 注册自定义指令
+// 可以一次性给所有指令进行注册
+Object.keys(directives).forEach(directiveName => {
+  Vue.directive(directiveName, directives[directiveName]) // 注册自定义指令
 })
 
 Vue.config.productionTip = false

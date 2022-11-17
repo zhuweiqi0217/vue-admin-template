@@ -20,7 +20,7 @@ export function getTimeStamp() {
   return Cookies.get(timeKey)
 }
 
-// 设置时间戳
+// 储存时间戳
 export function setTimeStamp() {
   return Cookies.set(timeKey, Date.now())
 }

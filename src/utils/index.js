@@ -115,3 +115,30 @@ export function param2Obj(url) {
   })
   return obj
 }
+
+// 将列表结构转为树形结构
+export function list2Tree(depts, rootValue) {
+  // rootValue表示一级部门的 pid 是什么 ''
+  // console.log(depts)
+  // 经过分析,我们发现 部门b 的pid 如果等于 部门a 的id的话 说明 部门b 是部门a 的子部门
+  // 一级部门的 pid 为空字符串
+
+  // 应该去将 depts 转成 树形结构了 [] reduce
+
+  // 处理函数的参数: prev -> 先前值、初始值
+  // curr -> 当前值
+  // index -> 当前值所在的索引(可省略)
+  // arr -> 就是你当前遍历的数组(可省略)
+  return depts.reduce((prev, curr, index, arr) => {
+    // 开始遍历了,开始从数组里面找(应该拿着 rootValue 去数组里找: item.pid)
+    curr.children = arr.filter(item => item.pid === curr.id)
+    // 相当于给每个人添加了一个 children 这个属性
+    // 最终我要收集数据到 prev 里面去
+
+    if (curr.pid === rootValue) {
+      // prev 里面装的都是一级部门
+      prev.push(curr)
+    }
+    return prev
+  }, [])
+}

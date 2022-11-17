@@ -22,7 +22,7 @@ router.beforeEach(async(to, from, next) => {
       // 如果当前vuex中有用户的资料id 表示 已经有资料了 不需要获取了 如果没有id才需要获取
       if (!store.getters.userId) {
         // 如果没有id才表示当前用户资料没有获取过
-        await store.dispatch('user/getInfo')
+        await store.dispatch('user/getUserInfo')
         // 如果说后续 需要根据用户资料获取数据的话 这里必须改成同步
       }
       next()
@@ -74,7 +74,7 @@ router.beforeEach(async(to, from, next) => {
 //       } else {
 //         try {
 //           // get user info
-//           await store.dispatch('user/getInfo')
+//           await store.dispatch('user/getUserInfo')
 
 //           next()
 //         } catch (error) {
